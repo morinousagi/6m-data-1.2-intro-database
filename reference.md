@@ -1,5 +1,3 @@
-# Self Studies
-
 ### Foundation
 
 - [Tech Terms and Definitions](https://hackr.io/blog/programming-terms-definitions-for-beginners)
