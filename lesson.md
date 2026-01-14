@@ -341,8 +341,11 @@ Understand the trade-offs of full normalisation:
 3. **Next Session Teaser:** "Now that we have our Blueprint, next week we actually start building the house using SQL CREATE and SELECT commands."
 
 
-
 ### **Solution**
+
+<details>
+
+  <summary>Click here to view solution</summary>
 
 #### **Activity 2.2.1**
 ```dbml
@@ -383,3 +386,4 @@ Table order_line_items {
 
 Ref: order_line_items.item_id > items.item_id
 ```
+</details>
