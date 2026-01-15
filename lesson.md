@@ -184,16 +184,12 @@ Construct an ERD for a school system whose classes have students and teachers. E
 
 Each entity has the following attributes:
 
-- Student: id, name, address, phone, email, class_id
-- Teacher: id, name, address, phone, email
-- Class: id, name, teacher_id
+> - Student: id, name, address, phone, email, class_id
+> - Teacher: id, name, address, phone, email
+> - Class: id, name, teacher_id
 
-> Write the DBML to create the ERD.
-
-```dbml
-// Your code here
-```
-Submit your code in Discord Peer-Review Channel: https://discord.com/channels/1165846570177150996/1457586759667028094
+* Write the DBML to create the ERD.
+* Submit your code in Discord Peer-Review Channel: https://discord.com/channels/1165846570177150996/1457586759667028094
 
 ## **🔵 Section 3: Normalization (Cleaning the House) (50 Mins)**
 
@@ -274,84 +270,20 @@ To fix this, we need to split the table into two tables: `Orders` and `OrderLine
 
 We have a messy table called `OrderLineItems`. It violates 3NF because `ItemName` and `ItemPrice` depend on `ItemID`, not on the specific order. This is a transitive dependency. A transitive dependency is when one or more columns in a table depend on a non-key column in that table.
 
-**Task: Let's break `OrderLineItems` into two tables: `OrderLineItems` and `Items`.**
+**Workshop 3.2.3: Let's break `OrderLineItems` into two tables: `OrderLineItems` and `Items`.**
 
-Using [dbdiagram.io](https://dbdiagram.io/d), learners decompose this into two clean tables: OrderLineItems and Items.
+> Using [dbdiagram.io](https://dbdiagram.io/d), learners decompose this into two clean tables: OrderLineItems and Items.
 
-```dbml
-// Activity 3.2.3
-// Your code here
-```
+* Write the DBML to create the ERD.
+* Submit your code in Discord Peer-Review Channel: https://discord.com/channels/1165846570177150996/1457586759667028094
 
 
 ### **3.3 Synthesis & Discussion**
 
-### Instructor Prompt
+* **Instructor:** "In our solution, if the price of the iPhone goes up to $1200 next year, does the old order history change?"  
+* **Learner Goal:** Realize that while Normalization is good, sometimes we *denormalize* (copy data) like sold\_price to preserve historical accuracy.
+* [More in Post-Class](./post-class.md)
 
-> Our tables are now fully normalised. But let’s explore the following situations:
->
-> **Step 1 – Historical Accuracy:**
-> Imagine the iPhone’s price increases to $1200 next year.
->
-> * What happens if we try to calculate last year’s revenue from our tables?
-> * How does full normalisation affect historical reporting?
->
-> **Step 2 – Query Complexity:**
-> Assuming we **did store historical prices**, how easy is it to answer questions like ‘Total revenue by product last year’ using only fully normalised tables?
->
-> * Consider the joins you would need and how this scales with large datasets.
-
-### Learner Goal
-
-Understand the trade-offs of full normalisation:
-
-<details>
-<summary>1. Structural correctness ✅</summary>
-
-* Fully normalised tables store each fact in exactly one place.
-* Example: No duplicate customers, consistent foreign key references, each order linked to the correct items.
-* **Why it matters:** Ensures entity relationships remain consistent, and avoids wasting storage on redundant or repeated data.
-
-</details>
-
-<details>
-<summary>2. Historical accuracy ⚠️</summary>
-
-* Fully normalised tables reference **current descriptive data**.
-* Updating `ItemPrice` in the `Items` table changes join results, so past revenues can appear wrong.
-* **Example:** Joining `Orders → OrderLineItems → Items` today gives $1200 for last year’s iPhone, even though it was sold for $1000.
-
-</details>
-
-<details>
-<summary>3. Query efficiency ⚠️</summary>
-
-* Analytical questions often require joining multiple tables.
-* **Example:** To calculate “total revenue by product last year” (assuming historical prices are stored), we need to join `Orders → OrderLineItems → Items` for every row.
-* Large datasets + multiple joins → slower queries and more complex SQL.
-
-</details>
-
-<details>
-<summary>4. Controlled denormalisation</summary>
-
-* To solve these practical issues, systems often **store slowly changing descriptive data directly in transactions**:
-
-  * Example: `sold_price`, `Product category`, `Brand` at time of sale.
-
-* **Benefits:**
-
-  * Preserves historical revenue and product context.
-  * Reduces joins → faster queries.
-  * Simplifies analytics and reporting.
-
-</details>
-
-### Key Takeaways
-
-1. **Normalisation ensures structural correctness.**
-2. **Controlled denormalisation preserves history and improves performance.**
-3. **Good data design balances integrity with practical business needs.**
 
 ## **🏁 Wrap Up (10 Mins)**
 
@@ -366,20 +298,7 @@ Understand the trade-offs of full normalisation:
 
   <summary>Click here to view solution</summary>
 
-#### **Activity 2.2.1**
-```dbml
-Table accidents {
-  id int [pk, increment]
-  date datetime
-  location varchar
-  description text
-  
-  car_id int // FK pointing to the car
-}
-Ref: accidents.car_id > cars.id
-```
-
-#### **Activity 3.2.3**
+#### **Workshop 3.2.3**
 
 ```dbml
 // 1. The "Master" List of Products
