@@ -178,7 +178,7 @@ Ref: accidents.car_id > cars.id
 </details>
 
 
-### **🟢 Activity 2.2.2: School System (10 Mins)**
+### **🟢 Activity 2.2.2 Workshop: School System (10 Mins)**
 
 Construct an ERD for a school system whose classes have students and teachers. Each student belongs to a single class. Each teacher may teach more than one class, and each class may have more than one teacher.
 
