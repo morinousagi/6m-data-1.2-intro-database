@@ -8,6 +8,7 @@ Refer to the following markdown file for the respective sections of the class:
 - [Lesson](./lesson.md)
 - [Post-Class](./post-class.md)
 - [Reference](./reference.md)
+- [Normalization Visualization](./visualisation/README.md) - Interactive tutorial for normalization concepts
 
 ## Lesson Objectives
 

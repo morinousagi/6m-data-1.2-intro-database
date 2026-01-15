@@ -195,6 +195,8 @@ Each entity has the following attributes:
 
 **Goal:** Convert messy data into efficient tables using Normal Forms.
 
+> **Interactive Tutorial:** Before diving in, try the [Normalization Interactive Visualization](./visualisation/normalization-interactive.html) to see the concepts in action. Open the HTML file in your browser and step through the 8-step tutorial.
+
 ### **3.1 The Narrative**
 
 Imagine a spreadsheet where every time you bought a coffee, the store wrote down your full home address next to the coffee price.
