@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Normalization - Interactive Tutorial</title>
+    <style>
+        :root {
+            --primary-key: #3B82F6;
+            --foreign-key: #8B5CF6;
+            --problem: #F59E0B;
+            --error: #EF4444;
+            --success: #10B981;
+            --bg-dark: #1F2937;
+            --bg-light: #F9FAFB;
+            --text-dark: #111827;
+            --text-light: #6B7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header & Progress */
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--bg-dark);
+            margin-bottom: 15px;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .progress-step.active {
+            background: var(--primary-key);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .progress-step.completed {
+            background: var(--success);
+            color: white;
+        }
+
+        .progress-line {
+            flex: 1;
+            height: 3px;
+            background: #E5E7EB;
+            border-radius: 2px;
+        }
+
+        .progress-line.completed {
+            background: var(--success);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step {
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease;
+            flex: 1;
+        }
+
+        .step.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
+            margin-bottom: 30px;
+        }
+
+        .step-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .badge-intro { background: #DBEAFE; color: #1E40AF; }
+        .badge-1nf { background: #FEF3C7; color: #92400E; }
+        .badge-2nf { background: #FCE7F3; color: #9D174D; }
+        .badge-3nf { background: #D1FAE5; color: #065F46; }
+
+        .step-title {
+            font-size: 1.6rem;
+            color: var(--bg-dark);
+            margin-bottom: 10px;
+        }
+
+        .step-description {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .step-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .table-wrapper {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .table-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--bg-dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-title .icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        table {
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        th {
+            background: var(--bg-dark);
+            color: white;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        th:first-child {
+            border-radius: 8px 0 0 0;
+        }
+
+        th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #F3F4F6;
+        }
+
+        /* Cell Highlights */
+        .pk {
+            background: rgba(59, 130, 246, 0.15) !important;
+            font-weight: 600;
+        }
+
+        .fk {
+            background: rgba(139, 92, 246, 0.15) !important;
+        }
+
+        .problem {
+            background: rgba(245, 158, 11, 0.2) !important;
+        }
+
+        .error-cell {
+            background: rgba(239, 68, 68, 0.15) !important;
+        }
+
+        .success-cell {
+            background: rgba(16, 185, 129, 0.1) !important;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes highlight-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .animate-highlight {
+            animation: highlight-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.6s ease forwards;
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.6s ease forwards;
+        }
+
+        /* Cards */
+        .cards-container {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            width: 280px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card:nth-child(1) { transition-delay: 0.1s; }
+        .card:nth-child(2) { transition-delay: 0.3s; }
+        .card:nth-child(3) { transition-delay: 0.5s; }
+
+        .card-1nf { border-color: #FCD34D; }
+        .card-2nf { border-color: #F472B6; }
+        .card-3nf { border-color: #34D399; }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+        }
+
+        .card-1nf .card-icon { background: #FEF3C7; }
+        .card-2nf .card-icon { background: #FCE7F3; }
+        .card-3nf .card-icon { background: #D1FAE5; }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--bg-dark);
+        }
+
+        .card-subtitle {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+
+        .card-description {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        /* Coffee Shop Story */
+        .story-container {
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .story-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .story-text {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .story-text strong {
+            color: var(--error);
+        }
+
+        /* Key Message Box */
+        .key-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-align: center;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Dependency Arrows */
+        .dependency-diagram {
+            position: relative;
+            padding: 20px;
+        }
+
+        .arrow-label {
+            position: absolute;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Navigation */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-prev {
+            background: #E5E7EB;
+            color: var(--text-dark);
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: #D1D5DB;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .step-indicator {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* Split Animation */
+        .split-container {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .table-wrapper.split-left {
+            animation: slideInLeft 0.8s ease forwards;
+        }
+
+        .table-wrapper.split-right {
+            animation: slideInRight 0.8s ease forwards;
+        }
+
+        /* Final Schema */
+        .final-schema {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .schema-row {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .relationship-line {
+            width: 2px;
+            height: 30px;
+            background: var(--foreign-key);
+            margin: 0 auto;
+        }
+
+        .success-glow {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            border: 2px solid var(--success);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header {
+                padding: 15px 20px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .progress-step {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            main {
+                padding: 25px;
+            }
+
+            .step-title {
+                font-size: 1.3rem;
+            }
+
+            .card {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-pk { background: rgba(59, 130, 246, 0.3); border: 2px solid var(--primary-key); }
+        .legend-fk { background: rgba(139, 92, 246, 0.3); border: 2px solid var(--foreign-key); }
+        .legend-problem { background: rgba(245, 158, 11, 0.3); border: 2px solid var(--problem); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Database Normalization: From Chaos to Clean</h1>
+            <div class="progress-container">
+                <div class="progress-step active" data-step="1">1</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">2</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">3</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="4">4</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="5">5</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="6">6</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="7">7</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="8">8</div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Step 1: Introduction -->
+            <div class="step active" data-step="1">
+                <div class="step-header">
+                    <span class="step-badge badge-intro">Introduction</span>
+                    <h2 class="step-title">The Update Anomaly Problem</h2>
+                    <p class="step-description">Why do we need normalization? Let's see what happens when data is stored inefficiently.</p>
+                </div>
+                <div class="step-content">
+                    <div class="story-container">
+                        <div class="story-icon">&#9749;</div>
+                        <p class="story-text">
+                            Imagine a coffee shop that writes down your <strong>full home address</strong> every time you buy a coffee.<br><br>
+                            If you move house, they have to find <strong>every single coffee purchase</strong> you ever made and update your address.<br><br>
+                            This is called an <strong>Update Anomaly</strong> - the same data stored in multiple places.
+                        </p>
+                        <div class="table-container">
+                            <div class="table-wrapper animate-pulse">
+                                <div class="table-title">Coffee Shop Records</div>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Coffee</th>
+                                            <th>Customer</th>
+                                            <th>Address</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>Jan 1</td><td>Latte</td><td>John</td><td class="error-cell">123 Oak St</td></tr>
+                                        <tr><td>Jan 3</td><td>Espresso</td><td>John</td><td class="error-cell">123 Oak St</td></tr>
+                                        <tr><td>Jan 5</td><td>Mocha</td><td>John</td><td class="error-cell">123 Oak St</td></tr>
+                                        <tr><td>Jan 7</td><td>Latte</td><td>John</td><td class="error-cell">123 Oak St</td></tr>
+                                        <tr><td>Jan 9</td><td>Cappuccino</td><td>John</td><td class="error-cell">123 Oak St</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="key-message">
+                            Normalization = Storing each piece of data in <strong>exactly one place</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Overview -->
+            <div class="step" data-step="2">
+                <div class="step-header">
+                    <span class="step-badge badge-intro">Overview</span>
+                    <h2 class="step-title">The Three Normal Forms</h2>
+                    <p class="step-description">Database normalization follows three progressive rules to eliminate redundancy.</p>
+                </div>
+                <div class="step-content">
+                    <div class="cards-container">
+                        <div class="card card-1nf">
+                            <div class="card-icon">&#128203;</div>
+                            <div class="card-title">1NF</div>
+                            <div class="card-subtitle">"No Lists"</div>
+                            <div class="card-description">
+                                Each cell contains a single value. No comma-separated lists like "Apple, Banana, Pear". Each row must be unique.
+                            </div>
+                        </div>
+                        <div class="card card-2nf">
+                            <div class="card-icon">&#128273;</div>
+                            <div class="card-title">2NF</div>
+                            <div class="card-subtitle">"The Whole Key"</div>
+                            <div class="card-description">
+                                Every column must depend on the <em>entire</em> primary key, not just part of it. Applies to composite keys.
+                            </div>
+                        </div>
+                        <div class="card card-3nf">
+                            <div class="card-icon">&#128279;</div>
+                            <div class="card-title">3NF</div>
+                            <div class="card-subtitle">"No Pass-Throughs"</div>
+                            <div class="card-description">
+                                No column should depend on another non-key column. Each fact depends only on the primary key.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="key-message">
+                        Let's apply these rules to a real e-commerce example!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: 1NF Problem -->
+            <div class="step" data-step="3">
+                <div class="step-header">
+                    <span class="step-badge badge-1nf">1NF</span>
+                    <h2 class="step-title">The Starting Table - Missing Primary Key</h2>
+                    <p class="step-description">Our OrderDetails table is in 1NF (single values, no lists). But there's a problem...</p>
+                </div>
+                <div class="step-content">
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color legend-problem"></div> Duplicate Values (Problem!)</div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <div class="table-title">OrderDetails Table</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>OrderID</th>
+                                        <th>ItemID</th>
+                                        <th>ItemName</th>
+                                        <th>ItemPrice</th>
+                                        <th>CustomerID</th>
+                                        <th>CustomerName</th>
+                                        <th>OrderDate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="problem animate-highlight">100</td>
+                                        <td>10</td><td>iPhone</td><td>1000</td>
+                                        <td>1</td><td>John</td><td>2021-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="problem animate-highlight">100</td>
+                                        <td>20</td><td>iPad</td><td>500</td>
+                                        <td>1</td><td>John</td><td>2021-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td>200</td>
+                                        <td>30</td><td>Macbook</td><td>2000</td>
+                                        <td>1</td><td>John</td><td>2021-01-02</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="problem animate-highlight">300</td>
+                                        <td>10</td><td>iPhone</td><td>1000</td>
+                                        <td>2</td><td>Mary</td><td>2021-01-03</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="problem animate-highlight">300</td>
+                                        <td>30</td><td>Macbook</td><td>2000</td>
+                                        <td>2</td><td>Mary</td><td>2021-01-03</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="key-message">
+                        OrderID alone is NOT unique! Orders 100 and 300 appear multiple times.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: 1NF Solution -->
+            <div class="step" data-step="4">
+                <div class="step-header">
+                    <span class="step-badge badge-1nf">1NF</span>
+                    <h2 class="step-title">Solution: Add LineNumber for Composite Key</h2>
+                    <p class="step-description">We add a LineNumber column. Together, OrderID + LineNumber uniquely identify each row.</p>
+                </div>
+                <div class="step-content">
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color legend-pk"></div> Primary Key (Composite)</div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-wrapper slide-in-left">
+                            <div class="table-title">OrderDetails Table (with Composite Key)</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>OrderID</th>
+                                        <th style="background: var(--primary-key);">LineNumber</th>
+                                        <th>ItemID</th>
+                                        <th>ItemName</th>
+                                        <th>ItemPrice</th>
+                                        <th>CustomerID</th>
+                                        <th>CustomerName</th>
+                                        <th>OrderDate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="pk">100</td><td class="pk">1</td>
+                                        <td>10</td><td>iPhone</td><td>1000</td>
+                                        <td>1</td><td>John</td><td>2021-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">100</td><td class="pk">2</td>
+                                        <td>20</td><td>iPad</td><td>500</td>
+                                        <td>1</td><td>John</td><td>2021-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">200</td><td class="pk">1</td>
+                                        <td>30</td><td>Macbook</td><td>2000</td>
+                                        <td>1</td><td>John</td><td>2021-01-02</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">300</td><td class="pk">1</td>
+                                        <td>10</td><td>iPhone</td><td>1000</td>
+                                        <td>2</td><td>Mary</td><td>2021-01-03</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">300</td><td class="pk">2</td>
+                                        <td>30</td><td>Macbook</td><td>2000</td>
+                                        <td>2</td><td>Mary</td><td>2021-01-03</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="key-message">
+                        Now every row is uniquely identified by (OrderID, LineNumber)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: 2NF Problem -->
+            <div class="step" data-step="5">
+                <div class="step-header">
+                    <span class="step-badge badge-2nf">2NF</span>
+                    <h2 class="step-title">Partial Dependency Problem</h2>
+                    <p class="step-description">Some columns only depend on PART of the composite key, not the whole key.</p>
+                </div>
+                <div class="step-content">
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color legend-pk"></div> Primary Key</div>
+                        <div class="legend-item"><div class="legend-color legend-problem"></div> Partial Dependency (only needs OrderID)</div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <div class="table-title">Which columns depend on what?</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>OrderID</th>
+                                        <th>LineNumber</th>
+                                        <th>ItemID</th>
+                                        <th>ItemName</th>
+                                        <th>ItemPrice</th>
+                                        <th style="background: var(--problem);">CustomerID</th>
+                                        <th style="background: var(--problem);">CustomerName</th>
+                                        <th style="background: var(--problem);">OrderDate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="pk">100</td><td class="pk">1</td>
+                                        <td>10</td><td>iPhone</td><td>1000</td>
+                                        <td class="problem">1</td><td class="problem">John</td><td class="problem">2021-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">100</td><td class="pk">2</td>
+                                        <td>20</td><td>iPad</td><td>500</td>
+                                        <td class="problem">1</td><td class="problem">John</td><td class="problem">2021-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">200</td><td class="pk">1</td>
+                                        <td>30</td><td>Macbook</td><td>2000</td>
+                                        <td class="problem">1</td><td class="problem">John</td><td class="problem">2021-01-02</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">300</td><td class="pk">1</td>
+                                        <td>10</td><td>iPhone</td><td>1000</td>
+                                        <td class="problem">2</td><td class="problem">Mary</td><td class="problem">2021-01-03</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">300</td><td class="pk">2</td>
+                                        <td>30</td><td>Macbook</td><td>2000</td>
+                                        <td class="problem">2</td><td class="problem">Mary</td><td class="problem">2021-01-03</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="key-message">
+                        CustomerID, CustomerName, and OrderDate only need OrderID - they don't care about LineNumber!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: 2NF Solution -->
+            <div class="step" data-step="6">
+                <div class="step-header">
+                    <span class="step-badge badge-2nf">2NF</span>
+                    <h2 class="step-title">Solution: Split Into Two Tables</h2>
+                    <p class="step-description">Move partial dependencies to a separate table. Each table's columns now depend on the WHOLE key.</p>
+                </div>
+                <div class="step-content">
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color legend-pk"></div> Primary Key</div>
+                        <div class="legend-item"><div class="legend-color legend-fk"></div> Foreign Key</div>
+                    </div>
+                    <div class="split-container">
+                        <div class="table-wrapper split-left">
+                            <div class="table-title">
+                                <span class="icon" style="background: var(--primary-key); color: white;">1</span>
+                                Orders Table
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>OrderID</th>
+                                        <th>CustomerID</th>
+                                        <th>CustomerName</th>
+                                        <th>OrderDate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="pk">100</td><td>1</td><td>John</td><td>2021-01-01</td></tr>
+                                    <tr><td class="pk">200</td><td>1</td><td>John</td><td>2021-01-02</td></tr>
+                                    <tr><td class="pk">300</td><td>2</td><td>Mary</td><td>2021-01-03</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-wrapper split-right">
+                            <div class="table-title">
+                                <span class="icon" style="background: var(--foreign-key); color: white;">2</span>
+                                OrderLineItems Table
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>OrderID</th>
+                                        <th>LineNumber</th>
+                                        <th>ItemID</th>
+                                        <th>ItemName</th>
+                                        <th>ItemPrice</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="fk">100</td><td class="pk">1</td><td>10</td><td>iPhone</td><td>1000</td></tr>
+                                    <tr><td class="fk">100</td><td class="pk">2</td><td>20</td><td>iPad</td><td>500</td></tr>
+                                    <tr><td class="fk">200</td><td class="pk">1</td><td>30</td><td>Macbook</td><td>2000</td></tr>
+                                    <tr><td class="fk">300</td><td class="pk">1</td><td>10</td><td>iPhone</td><td>1000</td></tr>
+                                    <tr><td class="fk">300</td><td class="pk">2</td><td>30</td><td>Macbook</td><td>2000</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="key-message">
+                        Now each column depends on the WHOLE primary key of its table!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7: 3NF Problem -->
+            <div class="step" data-step="7">
+                <div class="step-header">
+                    <span class="step-badge badge-3nf">3NF</span>
+                    <h2 class="step-title">Transitive Dependency Problem</h2>
+                    <p class="step-description">In OrderLineItems, ItemName and ItemPrice depend on ItemID, not on the order!</p>
+                </div>
+                <div class="step-content">
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color legend-pk"></div> Primary Key</div>
+                        <div class="legend-item"><div class="legend-color legend-problem"></div> Transitive Dependency (depends on ItemID)</div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <div class="table-title">OrderLineItems - Spot the Problem</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>OrderID</th>
+                                        <th>LineNumber</th>
+                                        <th>ItemID</th>
+                                        <th style="background: var(--problem);">ItemName</th>
+                                        <th style="background: var(--problem);">ItemPrice</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="pk">100</td><td class="pk">1</td>
+                                        <td>10</td>
+                                        <td class="problem">iPhone</td><td class="problem">1000</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">100</td><td class="pk">2</td>
+                                        <td>20</td>
+                                        <td class="problem">iPad</td><td class="problem">500</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">200</td><td class="pk">1</td>
+                                        <td>30</td>
+                                        <td class="problem">Macbook</td><td class="problem">2000</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">300</td><td class="pk">1</td>
+                                        <td>10</td>
+                                        <td class="problem">iPhone</td><td class="problem">1000</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pk">300</td><td class="pk">2</td>
+                                        <td>30</td>
+                                        <td class="problem">Macbook</td><td class="problem">2000</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="key-message">
+                        "iPhone" and "1000" are facts about Item 10, not about this specific order line!<br>
+                        If iPhone's price changes, we'd have to update EVERY row.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 8: 3NF Solution -->
+            <div class="step" data-step="8">
+                <div class="step-header">
+                    <span class="step-badge badge-3nf">3NF</span>
+                    <h2 class="step-title">Final Normalized Schema</h2>
+                    <p class="step-description">Extract Items into their own table. Each fact is now stored in exactly ONE place!</p>
+                </div>
+                <div class="step-content">
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color legend-pk"></div> Primary Key</div>
+                        <div class="legend-item"><div class="legend-color legend-fk"></div> Foreign Key</div>
+                    </div>
+                    <div class="final-schema">
+                        <div class="schema-row">
+                            <div class="table-wrapper success-glow slide-in-left">
+                                <div class="table-title">
+                                    <span class="icon" style="background: var(--success); color: white;">&#10003;</span>
+                                    Orders
+                                </div>
+                                <table>
+                                    <thead>
+                                        <tr><th>OrderID</th><th>CustomerID</th><th>CustomerName</th><th>OrderDate</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="pk">100</td><td>1</td><td>John</td><td>2021-01-01</td></tr>
+                                        <tr><td class="pk">200</td><td>1</td><td>John</td><td>2021-01-02</td></tr>
+                                        <tr><td class="pk">300</td><td>2</td><td>Mary</td><td>2021-01-03</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="schema-row">
+                            <div class="table-wrapper success-glow">
+                                <div class="table-title">
+                                    <span class="icon" style="background: var(--success); color: white;">&#10003;</span>
+                                    OrderLineItems
+                                </div>
+                                <table>
+                                    <thead>
+                                        <tr><th>OrderID</th><th>LineNumber</th><th>ItemID</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="fk">100</td><td class="pk">1</td><td class="fk">10</td></tr>
+                                        <tr><td class="fk">100</td><td class="pk">2</td><td class="fk">20</td></tr>
+                                        <tr><td class="fk">200</td><td class="pk">1</td><td class="fk">30</td></tr>
+                                        <tr><td class="fk">300</td><td class="pk">1</td><td class="fk">10</td></tr>
+                                        <tr><td class="fk">300</td><td class="pk">2</td><td class="fk">30</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="table-wrapper success-glow slide-in-right">
+                                <div class="table-title">
+                                    <span class="icon" style="background: var(--success); color: white;">&#10003;</span>
+                                    Items
+                                </div>
+                                <table>
+                                    <thead>
+                                        <tr><th>ItemID</th><th>ItemName</th><th>ItemPrice</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="pk">10</td><td>iPhone</td><td>1000</td></tr>
+                                        <tr><td class="pk">20</td><td>iPad</td><td>500</td></tr>
+                                        <tr><td class="pk">30</td><td>Macbook</td><td>2000</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="key-message" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+                        Each fact is stored in exactly ONE place! Change iPhone's price once, it updates everywhere.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="navigation">
+                <button class="nav-btn btn-prev" id="prevBtn" disabled>
+                    <span>&#8592;</span> Previous
+                </button>
+                <span class="step-indicator">Step <span id="currentStep">1</span> of 8</span>
+                <button class="nav-btn btn-next" id="nextBtn">
+                    Next <span>&#8594;</span>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Wizard Navigation
+        let currentStep = 1;
+        const totalSteps = 8;
+
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentStepSpan = document.getElementById('currentStep');
+
+        function updateStep(newStep) {
+            // Hide current step
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+
+            // Show new step
+            document.querySelector(`.step[data-step="${newStep}"]`).classList.add('active');
+
+            // Update progress indicators
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                const stepNum = index + 1;
+                step.classList.remove('active', 'completed');
+                if (stepNum < newStep) {
+                    step.classList.add('completed');
+                } else if (stepNum === newStep) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Update progress lines
+            document.querySelectorAll('.progress-line').forEach((line, index) => {
+                if (index < newStep - 1) {
+                    line.classList.add('completed');
+                } else {
+                    line.classList.remove('completed');
+                }
+            });
+
+            currentStep = newStep;
+            currentStepSpan.textContent = currentStep;
+
+            // Update button states
+            prevBtn.disabled = currentStep === 1;
+            nextBtn.innerHTML = currentStep === totalSteps
+                ? 'Restart <span>&#8635;</span>'
+                : 'Next <span>&#8594;</span>';
+
+            // Trigger animations for step 2 cards
+            if (currentStep === 2) {
+                setTimeout(() => {
+                    document.querySelectorAll('.card').forEach(card => {
+                        card.classList.add('visible');
+                    });
+                }, 100);
+            } else {
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.remove('visible');
+                });
+            }
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                updateStep(currentStep - 1);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStep < totalSteps) {
+                updateStep(currentStep + 1);
+            } else {
+                // Restart
+                updateStep(1);
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                if (currentStep < totalSteps) {
+                    updateStep(currentStep + 1);
+                }
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentStep > 1) {
+                    updateStep(currentStep - 1);
+                }
+            }
+        });
+
+        // Initialize
+        updateStep(1);
+    </script>
+</body>
+</html>

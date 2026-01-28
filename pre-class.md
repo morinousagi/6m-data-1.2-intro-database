@@ -38,6 +38,8 @@ Normalization is a fancy word for "organizing data to reduce redundancy." Imagin
 * **Un-normalized:** Storing the address 500 times.  
 * **Normalized:** Storing the address *once* in a "Customers" table, and just referring to the `Customer_ID` in the "Orders" table.
 
+* **Check out this:[Interactive Visulazation: Database Normalization](https://su-ntu-ctp.github.io/6m-data-1.2-intro-database/)**
+
 ## **🛠️ Part 2: Tool Setup**
 
 We will be using a browser-based tool to draw our diagrams. Please ensure you have access.

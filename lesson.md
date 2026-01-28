@@ -196,7 +196,7 @@ Each entity has the following attributes:
 
 **Goal:** Learn how to arrange information efficiently so you don't store the same thing multiple times.
 
-> **Interactive Tutorial:** Before reading further, try the [Normalization Interactive Visualization](./visualisation/normalization-interactive.html). Open this file in your web browser and follow the 8-step guided tour to see these ideas come to life.
+> **Interactive Tutorial:** Before reading further, try the [Normalization Interactive Visualization](https://su-ntu-ctp.github.io/6m-data-1.2-intro-database/). Open this file in your web browser and follow the 8-step guided tour to see these ideas come to life.
 
 ### **3.1 Why This Matters: The Coffee Shop Story**
 
